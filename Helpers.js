@@ -9,6 +9,13 @@ const Helpers = {
     sel.addRange(range);
   },
 
+  clearSelection: function () {
+    if (document.selection) {
+      document.selection.empty();
+    } else if ( window.getSelection ) {
+      window.getSelection().removeAllRanges();
+    }
+  }
 };
 
 export default Helpers;

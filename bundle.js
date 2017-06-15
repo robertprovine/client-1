@@ -142,6 +142,7 @@ var ControlFunctions = {
     };
 
     var nodeView = document.createElement(nodeType);
+    nodeView.setAttribute('spellcheck', 'false');
     nodeView.innerHTML = _DefaultContent2.default[nodeType];
     for (var CSSProperty in node.style) {
       console.log(node.style[CSSProperty]);
@@ -158,14 +159,18 @@ var ControlFunctions = {
 
     console.log('nodeIdx before: ' + _MasterState2.default.nodeIdx);
     console.log(_MasterState2.default.nodes[_MasterState2.default.nodeIdx]);
+    //if (MasterState.isBeingEdited === true) {
+    // }
     if (_MasterState2.default.DOMCurrentNode !== null) {
       if (_MasterState2.default.isBeingEdited === true) {
+        _Helpers2.default.clearSelection();
         _MasterState2.default.DOMCurrentNode.blur();
       }
       var sibling = direction === -1 ? _MasterState2.default.DOMCurrentNode.previousSibling : _MasterState2.default.DOMCurrentNode.nextSibling;
       if (sibling !== null) {
         sibling.style.backgroundColor = 'green';
         sibling.focus();
+        _MasterState2.default.isBeingEdited = false;
         _MasterState2.default.DOMCurrentNode.style.backgroundColor = _MasterState2.default.nodes[_MasterState2.default.nodeIdx].style.backgroundColor.convert(_MasterState2.default.nodes[_MasterState2.default.nodeIdx].style.backgroundColor.data);
         _MasterState2.default.nodeIdx += direction;
         _MasterState2.default.DOMCurrentNode = sibling;
@@ -181,9 +186,14 @@ var ControlFunctions = {
       return;
     }
 
-    _MasterState2.default.DOMCurrentNode.focus();
-    _Helpers2.default.selectElementContents(_MasterState2.default.DOMCurrentNode);
-    _MasterState2.default.DOMCurrentNode.setAttribute('contenteditable', true);
+    if (_MasterState2.default.isBeingEdited === false) {
+      _MasterState2.default.DOMCurrentNode.focus();
+      _Helpers2.default.selectElementContents(_MasterState2.default.DOMCurrentNode);
+      _MasterState2.default.DOMCurrentNode.setAttribute('contenteditable', true);
+      _MasterState2.default.isBeingEdited = true;
+    } else {
+      _MasterState2.default.DOMCurrentNode.blur();
+    }
   },
 
   changeStyle: function changeStyle(CSSProperty, idx, value) {},
@@ -225,6 +235,7 @@ var MIDIProgramFlow = {
   changeStyle: _ControlFunctions2.default.changeStyle,
   saveProject: _ControlFunctions2.default.saveProject,
   navigate: _ControlFunctions2.default.navigate,
+  editContent: _ControlFunctions2.default.editContent,
 
   onMIDIMessage: function onMIDIMessage(message) {
 
@@ -243,6 +254,9 @@ var MIDIProgramFlow = {
           break;
         case 10:
           this.append('div');
+          break;
+        case 15:
+          this.editContent();
           break;
         case 23:
           this.saveProject();
@@ -317,18 +331,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function keyInputs() {
 
-  document.addEventListener('keyup', function (event) {
-    switch (event.key) {
-      case 'Enter':
-        if (_MasterState2.default.isBeingEdited === false) {
-          _ControlFunctions2.default.editContent();
-          _MasterState2.default.isBeingEdited = true;
-        } else {
-          //MasterState.DOMCurrentNode.blur();
-        }
-        break;
-    }
-  });
+  /*
+    document.addEventListener('keyup', event => {
+      switch (event.key) {
+        case 'Enter':
+          if (MasterState.isBeingEdited === false) {
+            ControlFunctions.editContent();
+            MasterState.isBeingEdited = true;
+          } else {
+            MasterState.DOMCurrentNode.blur();
+          }
+          break;
+      }
+    });
+  */
+
 }
 
 exports.default = keyInputs;
@@ -396,8 +413,15 @@ var Helpers = {
     var sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
-  }
+  },
 
+  clearSelection: function clearSelection() {
+    if (document.selection) {
+      document.selection.empty();
+    } else if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
+  }
 };
 
 exports.default = Helpers;

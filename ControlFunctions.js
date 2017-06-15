@@ -14,6 +14,7 @@ const ControlFunctions = {
     };
 
     const nodeView = document.createElement(nodeType);
+    nodeView.setAttribute('spellcheck', 'false');
     nodeView.innerHTML = DefaultContent[nodeType];
     for (let CSSProperty in node.style) {
       console.log(node.style[CSSProperty]);
@@ -33,8 +34,11 @@ const ControlFunctions = {
 
     console.log('nodeIdx before: ' + MasterState.nodeIdx);
     console.log(MasterState.nodes[MasterState.nodeIdx]);
+    //if (MasterState.isBeingEdited === true) {
+   // }
     if (MasterState.DOMCurrentNode !== null) {
       if (MasterState.isBeingEdited === true) {
+        Helpers.clearSelection();
         MasterState.DOMCurrentNode.blur();
       }
       const sibling = (direction === -1) ?
@@ -43,6 +47,7 @@ const ControlFunctions = {
       if (sibling !== null) {
         sibling.style.backgroundColor = 'green';
         sibling.focus();
+        MasterState.isBeingEdited = false;
         MasterState.DOMCurrentNode.style.backgroundColor =
           MasterState.nodes[MasterState.nodeIdx].style.backgroundColor.convert(
             MasterState.nodes[MasterState.nodeIdx].style.backgroundColor.data
@@ -62,9 +67,15 @@ const ControlFunctions = {
       return;
     }
 
-    MasterState.DOMCurrentNode.focus();
-    Helpers.selectElementContents(MasterState.DOMCurrentNode);
-    MasterState.DOMCurrentNode.setAttribute('contenteditable', true);
+    if (MasterState.isBeingEdited === false) {
+      MasterState.DOMCurrentNode.focus();
+      Helpers.selectElementContents(MasterState.DOMCurrentNode);
+      MasterState.DOMCurrentNode.setAttribute('contenteditable', true);
+      MasterState.isBeingEdited = true;
+    } else {
+      MasterState.DOMCurrentNode.blur();
+    }
+
 
   },
 
