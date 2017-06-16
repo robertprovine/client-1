@@ -1,12 +1,13 @@
 import MasterState from './MasterState';
 import MIDI from './MIDI';
 import ControlFunctions from './ControlFunctions';
+import DatabaseFunctions from './DatabaseFunctions';
 
 const MIDIProgramFlow = {
 
   append: ControlFunctions.append,
   changeStyle: ControlFunctions.changeStyle,
-  saveProject: ControlFunctions.saveProject,
+  saveProject: DatabaseFunctions.saveProject,
   navigate: ControlFunctions.navigate,
   editContent: ControlFunctions.editContent,
 

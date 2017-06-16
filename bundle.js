@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -117,15 +117,15 @@ var _MasterState = __webpack_require__(0);
 
 var _MasterState2 = _interopRequireDefault(_MasterState);
 
-var _DefaultContent = __webpack_require__(5);
+var _DefaultContent = __webpack_require__(2);
 
 var _DefaultContent2 = _interopRequireDefault(_DefaultContent);
 
-var _defaultStyles = __webpack_require__(8);
+var _defaultStyles = __webpack_require__(4);
 
 var _defaultStyles2 = _interopRequireDefault(_defaultStyles);
 
-var _Helpers = __webpack_require__(6);
+var _Helpers = __webpack_require__(3);
 
 var _Helpers2 = _interopRequireDefault(_Helpers);
 
@@ -143,6 +143,7 @@ var ControlFunctions = {
 
     var nodeView = document.createElement(nodeType);
     nodeView.setAttribute('spellcheck', 'false');
+    nodeView.setAttribute('contenteditable', 'true');
     nodeView.innerHTML = _DefaultContent2.default[nodeType];
     for (var CSSProperty in node.style) {
       console.log(node.style[CSSProperty]);
@@ -153,46 +154,25 @@ var ControlFunctions = {
     _MasterState2.default.nodeIdx++;
     _MasterState2.default.DOMroot.appendChild(nodeView);
     _MasterState2.default.DOMCurrentNode = nodeView;
+
+    nodeView.focus();
+    _Helpers2.default.clearSelection();
+    _Helpers2.default.selectElementContents(nodeView);
   },
 
   navigate: function navigate(direction) {
 
-    console.log('nodeIdx before: ' + _MasterState2.default.nodeIdx);
-    console.log(_MasterState2.default.nodes[_MasterState2.default.nodeIdx]);
-    //if (MasterState.isBeingEdited === true) {
-    // }
     if (_MasterState2.default.DOMCurrentNode !== null) {
-      if (_MasterState2.default.isBeingEdited === true) {
-        _Helpers2.default.clearSelection();
-        _MasterState2.default.DOMCurrentNode.blur();
-      }
       var sibling = direction === -1 ? _MasterState2.default.DOMCurrentNode.previousSibling : _MasterState2.default.DOMCurrentNode.nextSibling;
       if (sibling !== null) {
-        sibling.style.backgroundColor = 'green';
+        _Helpers2.default.clearSelection();
         sibling.focus();
+        _Helpers2.default.selectElementContents(sibling);
         _MasterState2.default.isBeingEdited = false;
-        _MasterState2.default.DOMCurrentNode.style.backgroundColor = _MasterState2.default.nodes[_MasterState2.default.nodeIdx].style.backgroundColor.convert(_MasterState2.default.nodes[_MasterState2.default.nodeIdx].style.backgroundColor.data);
         _MasterState2.default.nodeIdx += direction;
         _MasterState2.default.DOMCurrentNode = sibling;
         _MasterState2.default.DOMCurrentNode.scrollIntoView();
       }
-    }
-    console.log('nodeIdx after: ' + _MasterState2.default.nodeIdx);
-  },
-
-  editContent: function editContent() {
-
-    if (_MasterState2.default.nodes.length === 0) {
-      return;
-    }
-
-    if (_MasterState2.default.isBeingEdited === false) {
-      _MasterState2.default.DOMCurrentNode.focus();
-      _Helpers2.default.selectElementContents(_MasterState2.default.DOMCurrentNode);
-      _MasterState2.default.DOMCurrentNode.setAttribute('contenteditable', true);
-      _MasterState2.default.isBeingEdited = true;
-    } else {
-      _MasterState2.default.DOMCurrentNode.blur();
     }
   },
 
@@ -214,12 +194,127 @@ exports.default = ControlFunctions;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+var DefaultContent = {
+
+  h1: "Hypertext Control",
+
+  p: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+
+  div: "div master"
+
+};
+
+exports.default = DefaultContent;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Helpers = {
+
+  // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
+  selectElementContents: function selectElementContents(el) {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  },
+
+  clearSelection: function clearSelection() {
+    if (document.selection) {
+      document.selection.empty();
+    } else if (window.getSelection) {
+      window.getSelection().removeAllRanges();
+    }
+  }
+};
+
+exports.default = Helpers;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Conversions = __webpack_require__(7);
+
+var _Conversions2 = _interopRequireDefault(_Conversions);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function defaultStyles(nodeType) {
+
+  var style = void 0;
+
+  switch (nodeType) {
+    case 'h1':
+      style = {
+        color: {
+          data: [0, 0, 0, 1],
+          convert: _Conversions2.default.toRGBA
+        },
+        backgroundColor: {
+          data: [255, 255, 255, 1],
+          convert: _Conversions2.default.toRGBA
+        }
+      };
+      return style;
+    case 'p':
+      return {
+        color: {
+          data: [0, 100, 0, 1],
+          convert: _Conversions2.default.toRGBA
+        },
+        backgroundColor: {
+          data: [255, 255, 255, 1],
+          convert: _Conversions2.default.toRGBA
+        }
+      };
+    case 'div':
+      return {
+        color: {
+          data: [0, 0, 0, 1],
+          convert: _Conversions2.default.toRGBA
+        },
+        backgroundColor: {
+          data: [255, 0, 255, 1],
+          convert: _Conversions2.default.toRGBA
+        }
+      };
+  }
+}
+
+exports.default = defaultStyles;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _MasterState = __webpack_require__(0);
 
 var _MasterState2 = _interopRequireDefault(_MasterState);
 
-var _MIDI = __webpack_require__(7);
+var _MIDI = __webpack_require__(9);
 
 var _MIDI2 = _interopRequireDefault(_MIDI);
 
@@ -227,13 +322,17 @@ var _ControlFunctions = __webpack_require__(1);
 
 var _ControlFunctions2 = _interopRequireDefault(_ControlFunctions);
 
+var _DatabaseFunctions = __webpack_require__(8);
+
+var _DatabaseFunctions2 = _interopRequireDefault(_DatabaseFunctions);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var MIDIProgramFlow = {
 
   append: _ControlFunctions2.default.append,
   changeStyle: _ControlFunctions2.default.changeStyle,
-  saveProject: _ControlFunctions2.default.saveProject,
+  saveProject: _DatabaseFunctions2.default.saveProject,
   navigate: _ControlFunctions2.default.navigate,
   editContent: _ControlFunctions2.default.editContent,
 
@@ -309,7 +408,7 @@ var MIDIProgramFlow = {
 exports.default = MIDIProgramFlow;
 
 /***/ }),
-/* 3 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -351,7 +450,7 @@ function keyInputs() {
 exports.default = keyInputs;
 
 /***/ }),
-/* 4 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -373,7 +472,7 @@ var Conversions = {
 exports.default = Conversions;
 
 /***/ }),
-/* 5 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -382,52 +481,37 @@ exports.default = Conversions;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var DefaultContent = {
 
-  h1: "Hypertext Control",
+var _MasterState = __webpack_require__(0);
 
-  p: "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+var _MasterState2 = _interopRequireDefault(_MasterState);
 
-  div: "div master"
+var _DefaultContent = __webpack_require__(2);
 
-};
+var _DefaultContent2 = _interopRequireDefault(_DefaultContent);
 
-exports.default = DefaultContent;
+var _defaultStyles = __webpack_require__(4);
 
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
+var _defaultStyles2 = _interopRequireDefault(_defaultStyles);
 
-"use strict";
+var _Helpers = __webpack_require__(3);
 
+var _Helpers2 = _interopRequireDefault(_Helpers);
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var Helpers = {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-  // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
-  selectElementContents: function selectElementContents(el) {
-    var range = document.createRange();
-    range.selectNodeContents(el);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-  },
+var DatabaseFunctions = {
 
-  clearSelection: function clearSelection() {
-    if (document.selection) {
-      document.selection.empty();
-    } else if (window.getSelection) {
-      window.getSelection().removeAllRanges();
-    }
+  saveProject: function saveProject() {
+    console.log(_MasterState2.default.nodes);
   }
+
 };
 
-exports.default = Helpers;
+exports.default = DatabaseFunctions;
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -481,78 +565,17 @@ var MIDI = {
 exports.default = MIDI;
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Conversions = __webpack_require__(4);
-
-var _Conversions2 = _interopRequireDefault(_Conversions);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function defaultStyles(nodeType) {
-
-  var style = void 0;
-
-  switch (nodeType) {
-    case 'h1':
-      style = {
-        color: {
-          data: [0, 0, 0, 1],
-          convert: _Conversions2.default.toRGBA
-        },
-        backgroundColor: {
-          data: [255, 255, 255, 1],
-          convert: _Conversions2.default.toRGBA
-        }
-      };
-      return style;
-    case 'p':
-      return {
-        color: {
-          data: [0, 100, 0, 1],
-          convert: _Conversions2.default.toRGBA
-        },
-        backgroundColor: {
-          data: [255, 255, 255, 1],
-          convert: _Conversions2.default.toRGBA
-        }
-      };
-    case 'div':
-      return {
-        color: {
-          data: [0, 0, 0, 1],
-          convert: _Conversions2.default.toRGBA
-        },
-        backgroundColor: {
-          data: [255, 0, 255, 1],
-          convert: _Conversions2.default.toRGBA
-        }
-      };
-  }
-}
-
-exports.default = defaultStyles;
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _MIDIProgramFlow = __webpack_require__(2);
+var _MIDIProgramFlow = __webpack_require__(5);
 
 var _MIDIProgramFlow2 = _interopRequireDefault(_MIDIProgramFlow);
 
-var _keyInputs = __webpack_require__(3);
+var _keyInputs = __webpack_require__(6);
 
 var _keyInputs2 = _interopRequireDefault(_keyInputs);
 

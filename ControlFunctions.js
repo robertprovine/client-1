@@ -15,6 +15,7 @@ const ControlFunctions = {
 
     const nodeView = document.createElement(nodeType);
     nodeView.setAttribute('spellcheck', 'false');
+    nodeView.setAttribute('contenteditable', 'true');
     nodeView.innerHTML = DefaultContent[nodeType];
     for (let CSSProperty in node.style) {
       console.log(node.style[CSSProperty]);
@@ -28,54 +29,28 @@ const ControlFunctions = {
     MasterState.DOMroot.appendChild(nodeView);
     MasterState.DOMCurrentNode = nodeView;
 
+    nodeView.focus();
+    Helpers.clearSelection();
+    Helpers.selectElementContents(nodeView);
+
   },
 
   navigate: function (direction) {
 
-    console.log('nodeIdx before: ' + MasterState.nodeIdx);
-    console.log(MasterState.nodes[MasterState.nodeIdx]);
-    //if (MasterState.isBeingEdited === true) {
-   // }
     if (MasterState.DOMCurrentNode !== null) {
-      if (MasterState.isBeingEdited === true) {
-        Helpers.clearSelection();
-        MasterState.DOMCurrentNode.blur();
-      }
       const sibling = (direction === -1) ?
         MasterState.DOMCurrentNode.previousSibling :
         MasterState.DOMCurrentNode.nextSibling;
       if (sibling !== null) {
-        sibling.style.backgroundColor = 'green';
+        Helpers.clearSelection();
         sibling.focus();
+        Helpers.selectElementContents(sibling);
         MasterState.isBeingEdited = false;
-        MasterState.DOMCurrentNode.style.backgroundColor =
-          MasterState.nodes[MasterState.nodeIdx].style.backgroundColor.convert(
-            MasterState.nodes[MasterState.nodeIdx].style.backgroundColor.data
-          );
         MasterState.nodeIdx += direction;
         MasterState.DOMCurrentNode = sibling;
         MasterState.DOMCurrentNode.scrollIntoView();
       }
     }
-    console.log('nodeIdx after: ' + MasterState.nodeIdx);
-
-  },
-
-  editContent: function () {
-
-    if (MasterState.nodes.length === 0) {
-      return;
-    }
-
-    if (MasterState.isBeingEdited === false) {
-      MasterState.DOMCurrentNode.focus();
-      Helpers.selectElementContents(MasterState.DOMCurrentNode);
-      MasterState.DOMCurrentNode.setAttribute('contenteditable', true);
-      MasterState.isBeingEdited = true;
-    } else {
-      MasterState.DOMCurrentNode.blur();
-    }
-
 
   },
 
